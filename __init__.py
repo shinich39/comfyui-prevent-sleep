@@ -10,8 +10,6 @@ from .libs import install, screen, sleep
 
 install.install_wakepy()
 
-WEB_DIRECTORY = "./web/js"
-
 NODE_CLASS_MAPPINGS = {}
 
 NODE_DISPLAY_NAME_MAPPINGS = {}
