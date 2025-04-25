@@ -6,7 +6,9 @@
 @description: Prevent sleep while running ComfyUI.
 """
 
-from .libs import screen, sleep
+from .libs import install, screen, sleep
+
+install.install_wakepy()
 
 WEB_DIRECTORY = "./web/js"
 
