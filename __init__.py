@@ -6,7 +6,7 @@
 @description: Prevent sleep while running ComfyUI.
 """
 
-from .libs import install, screen, sleep
+from .py import install, screen, sleep
 
 install.install_wakepy()
 
@@ -14,6 +14,6 @@ NODE_CLASS_MAPPINGS = {}
 
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
-WEB_DIRECTORY = "./web/js"
+WEB_DIRECTORY = "./js"
 
-__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
+__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
