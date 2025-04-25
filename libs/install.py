@@ -36,15 +36,15 @@ def run_script(cmd, cwd='.'):
 def install_wakepy():
   try:
     import wakepy
-    # print(f"[comfyui-grabage-shits] wakepy found.")
+    # print(f"wakepy has already been installed.")
     return True
   except:
-    print(f"[comfyui-grabage-shits] wakepy not found. start module installation.")
+    print(f"wakepy not found. start module installation.")
     try:
       run_script([sys.executable, '-s', '-m', 'pip', 'install', 'wakepy'])
       import wakepy
-      print(f"[comfyui-grabage-shits] wakepy installed successfully.")
+      print(f"wakepy installed successfully.")
       return True
     except:
-      print(f"[comfyui-grabage-shits] failed to install wakepy.")
+      print(f"failed to install wakepy.")
       return False
