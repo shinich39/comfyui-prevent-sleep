@@ -1,4 +1,4 @@
-## comfyui-prevent-sleep
+# comfyui-prevent-sleep
 
 Prevent sleep while running ComfyUI.
 
