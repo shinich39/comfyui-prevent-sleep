@@ -36,15 +36,31 @@ def run_script(cmd, cwd='.'):
 def install_wakepy():
   try:
     import wakepy
-    # print(f"wakepy has already been installed.")
+    print(f"[comfyui-prevent-sleep] wakepy has already been installed.")
     return True
   except:
-    print(f"wakepy not found. start module installation.")
+    print(f"[comfyui-prevent-sleep] wakepy not found. start module installation.")
     try:
       run_script([sys.executable, '-s', '-m', 'pip', 'install', 'wakepy'])
       import wakepy
-      print(f"wakepy installed successfully.")
+      print(f"[comfyui-prevent-sleep] wakepy installed successfully.")
       return True
     except:
-      print(f"failed to install wakepy.")
+      print(f"[comfyui-prevent-sleep] failed to install wakepy.")
+      return False
+    
+def install_win32api():
+  try:
+    import win32api
+    print(f"[comfyui-prevent-sleep] win32api has already been installed.")
+    return True
+  except:
+    print(f"[comfyui-prevent-sleep] win32api not found. start module installation.")
+    try:
+      run_script([sys.executable, '-s', '-m', 'pip', 'install', 'pywin32'])
+      import win32api
+      print(f"[comfyui-prevent-sleep] win32api installed successfully.")
+      return True
+    except:
+      print(f"[comfyui-prevent-sleep] failed to install win32api.")
       return False

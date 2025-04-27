@@ -1,12 +1,11 @@
 import traceback
-import atexit
 
 from server import PromptServer
 from aiohttp import web
 
 wakeup = None
 
-def activate_s():
+def activate():
   global wakeup
   
   from wakepy import keep
@@ -16,13 +15,13 @@ def activate_s():
     wakeup = keep.running()
     wakeup._activate()
 
-    print(f'Prevent sleep')
+    print(f'[comfyui-prevent-sleep] Prevent sleep')
     return True
   else:
-    print(f'Sleep has already been prevented')
+    print(f'[comfyui-prevent-sleep] Sleep has already been prevented')
     return False
 
-def deactivate_s():
+def deactivate():
   global wakeup
 
   if wakeup != None:
@@ -30,29 +29,26 @@ def deactivate_s():
     wakeup._deactivate()
     wakeup = None
 
-    print(f'Allow sleep')
+    print(f'[comfyui-prevent-sleep] Allow sleep')
 
     return True
   else:
     return False
 
 @PromptServer.instance.routes.get("/shinich39/comfyui-prevent-sleep/prevent-sleep")
-async def _prevent_s(request):
+async def _prevent(request):
   try:
-    activate_s()
+    activate()
     return web.Response(status=200)
   except Exception:
     print(traceback.format_exc())
     return web.Response(status=400)
 
 @PromptServer.instance.routes.get("/shinich39/comfyui-prevent-sleep/allow-sleep")
-async def _allow_s(request):
+async def _allow(request):
   try:
-    deactivate_s()
+    deactivate()
     return web.Response(status=200)
   except Exception:
     print(traceback.format_exc())
     return web.Response(status=400)
-
-# deactivate when closing comfyui
-atexit.register(deactivate_s)
