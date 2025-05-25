@@ -4,8 +4,7 @@
   "description": "Prevent sleep while running ComfyUI.",
   "type": "module",
   "scripts": {
-    "commit": "node scripts/commit.js",
-    "pub": "node scripts/publish.js"
+    "commit": "node scripts/commit.js"
   },
   "repository": {
     "type": "git",
