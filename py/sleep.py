@@ -18,7 +18,7 @@ def activate():
     print(f'[comfyui-prevent-sleep] Prevent sleep')
     return True
   else:
-    print(f'[comfyui-prevent-sleep] Sleep has already been prevented')
+    # print(f'[comfyui-prevent-sleep] Sleep has already been prevented')
     return False
 
 def deactivate():

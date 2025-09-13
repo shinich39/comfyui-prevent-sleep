@@ -1,6 +1,10 @@
+import traceback
 import subprocess
 import threading
 import sys
+
+from server import PromptServer
+from aiohttp import web
 
 # https://github.com/WASasquatch/was-node-suite-comfyui
 def get_packages(versions=False):
@@ -64,3 +68,12 @@ def install_win32api():
     except:
       print(f"[comfyui-prevent-sleep] failed to install win32api.")
       return False
+    
+@PromptServer.instance.routes.get("/shinich39/comfyui-prevent-sleep/check-dependencies")
+async def _check_dependencies(request):
+  try:
+    import wakepy
+    return web.Response(status=200)
+  except Exception:
+    print(traceback.format_exc())
+    return web.Response(status=400)

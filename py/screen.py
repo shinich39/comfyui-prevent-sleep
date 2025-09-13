@@ -17,7 +17,7 @@ def activate():
     print(f'[comfyui-prevent-sleep] Prevent screen saver')
     return True
   else:
-    print(f'[comfyui-prevent-sleep] Screen saver has already been prevented')
+    # print(f'[comfyui-prevent-sleep] Screen saver has already been prevented')
     return False
 
 def deactivate():
