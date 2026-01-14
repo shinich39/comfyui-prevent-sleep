@@ -2,7 +2,7 @@
 @author: shinich39
 @title: comfyui-prevent-sleep
 @nickname: comfyui-prevent-sleep
-@version: 1.0.1
+@version: 1.0.2
 @description: Prevent sleep while running ComfyUI.
 """
 
@@ -11,7 +11,7 @@ import atexit
 import signal
 import os
 
-from .py import install, screen, sleep
+from .py import install, wakeup
 
 install.install_wakepy()
 
@@ -26,12 +26,10 @@ __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
 # deactivate when closing comfyui
 
 def on_close():
-  sleep.deactivate()
-  screen.deactivate()
+  wakeup.deactivate()
   sys.exit(0)
   
-atexit.register(sleep.deactivate)
-atexit.register(screen.deactivate)
+atexit.register(wakeup.deactivate)
 
 if hasattr(signal, "SIGINT") == True:
   signal.signal(signal.SIGINT, on_close) # Ctrl + C

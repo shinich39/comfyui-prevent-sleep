@@ -3,40 +3,34 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
 
-const Settings = {
-  Duration: 0, // infinite
-  ScreenSaver: false,
-  Sleep: true,
-}
-
 let initialized = false,
     timer;
+
+function getSettingValue(id) {
+  return app.extensionManager.setting.get(`shinich39.PreventSleep.${id}`);
+}
 
 async function chkDependencies() {
   const response = await api.fetchApi(`/shinich39/comfyui-prevent-sleep/check-dependencies`);
   return response.status === 200;
 }
 
-async function setSleep(value) {
-  const url = value 
-    ? `/shinich39/comfyui-prevent-sleep/prevent-sleep`
-    : `/shinich39/comfyui-prevent-sleep/allow-sleep`;
+async function update(type) {
+  const url = type !== "none" 
+    ? `/shinich39/comfyui-prevent-sleep/enable`
+    : `/shinich39/comfyui-prevent-sleep/disable`
 
-  const response = await api.fetchApi(url);
+  const response = await api.fetchApi(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", },
+    body: JSON.stringify({ type }),
+  });
+
   if (response.status !== 200) {
     throw new Error(response.statusText);
   }
-}
 
-async function setScreenSaver(value) {
-  const url = value 
-    ? `/shinich39/comfyui-prevent-sleep/prevent-screen-saver`
-    : `/shinich39/comfyui-prevent-sleep/allow-screen-saver`;
-
-  const response = await api.fetchApi(url);
-  if (response.status !== 200) {
-    throw new Error(response.statusText);
-  }
+  return type !== "none";
 }
 
 function wait(delay) {
@@ -50,66 +44,60 @@ function clearTimer() {
 }
 
 function setTimer() {
-  clearTimer();
+  setTimeout(async () => {
+    clearTimer();
 
-  if (!initialized) {
-    console.warn("[comfyui-prevent-sleep] not intialized yet");
-    return;
-  }
+    if (!initialized) {
+      console.warn("[comfyui-prevent-sleep] not intialized yet");
+      return;
+    }
 
-  if (Settings.ScreenSaver) {
-    setScreenSaver(true);
-  }
+    const type = getSettingValue("Type");
+    // console.log(`[comfyui-prevent-sleep] type:`, type);
 
-  if (Settings.Sleep) {
-    setSleep(true);
-  }
+    const enabled = await update(type);
 
-  const duration = Settings.Duration;
-  if (duration < 1) {
-    return;
-  }
+    if (!enabled) {
+      return;
+    }
 
-  timer = setTimeout(async () => {
-    setSleep(false);
-    setScreenSaver(false);
-  }, 1000 * duration);
+    const duration = getSettingValue("Duration");
+    // console.log(`[comfyui-prevent-sleep] duration:`, duration);
+    
+    if (duration > 0) {
+      timer = setTimeout(() => {
+        update("none");
+      }, 1000 * duration);
+    }
+  }, 256);
 }
 
 app.registerExtension({
 	name: "shinich39.PreventSleep",
   settings: [
     {
-      id: 'shinich39.PreventSleep.Timeout',
+      id: 'shinich39.PreventSleep.Duration',
       category: ['PreventSleep', 'The desktop screamed, Not in sound', 'Duration'],
       name: 'Duration',
       type: 'number',
       tooltip: 'When generating image ended, it will allow prevented options after set time has passed, value is seconds, 0 is infinite',
-      defaultValue: Settings.Duration,
+      defaultValue: 0,
       onChange: async (value) => {
-        Settings.Duration = value;
         setTimer();
       }
     },
     {
-      id: 'shinich39.PreventSleep.ScreenSaver',
-      category: ['PreventSleep', 'The desktop screamed, Not in sound', 'ScreenSaver'],
-      name: 'Screen Saver',
-      type: 'boolean',
-      defaultValue: Settings.ScreenSaver,
+      id: 'shinich39.PreventSleep.Type',
+      category: ['PreventSleep', 'The desktop screamed, Not in sound', 'Type'],
+      name: 'Type',
+      type: "combo",
+      defaultValue: "none",
+      options: [
+        { text: "None", value: "none" },
+        { text: "Sleep", value: "sleep" },
+        { text: "Screen Saver", value: "screen_saver" },
+      ],
       onChange: async (value) => {
-        Settings.ScreenSaver = value;
-        setTimer();
-      }
-    },
-    {
-      id: 'shinich39.PreventSleep.Sleep',
-      category: ['PreventSleep', 'The desktop screamed, Not in sound', 'Sleep'],
-      name: 'Sleep',
-      type: 'boolean',
-      defaultValue: false,
-      onChange: async (value) => {
-        Settings.Sleep = value;
         setTimer();
       }
     },
@@ -134,10 +122,10 @@ app.registerExtension({
       }
 
       if (retry > 0) {
-        console.log("[comfyui-prevent-sleep] initialized");
+        console.log("[comfyui-prevent-sleep] Initialized");
         setTimer();
       } else {
-        console.log("[comfyui-prevent-sleep] failed to initialize");
+        console.log("[comfyui-prevent-sleep] Failed to initialize");
       }
     })();
   },
