@@ -4,7 +4,7 @@ Prevent sleep while running ComfyUI.
 
 ## Usage  
 
-Settings > PreventSleep > Duration, Sleep, Screen Saver 
+Settings > PreventSleep > Mode, Duration
 
 ## Acknowledgments
 
