@@ -104,9 +104,9 @@ app.registerExtension({
   ],
 
   setup() {
-    api.addEventListener("promptQueued", function(...args) {
-      setTimer();
-    });
+    // api.addEventListener("promptQueued", function(...args) {
+    //   setTimer();
+    // });
 
     api.addEventListener("executed", function(...args) {
       setTimer();

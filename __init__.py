@@ -2,7 +2,7 @@
 @author: shinich39
 @title: comfyui-prevent-sleep
 @nickname: comfyui-prevent-sleep
-@version: 1.0.2
+@version: 1.0.3
 @description: Prevent sleep while running ComfyUI.
 """
 
