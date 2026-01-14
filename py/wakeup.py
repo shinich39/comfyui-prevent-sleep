@@ -23,7 +23,7 @@ def initialize():
 
   return _keep
 
-def activate(type):
+def activate(mode):
   global _wake
 
   keep = initialize()
@@ -34,22 +34,22 @@ def activate(type):
   
   if _wake is not None:
 
-    if type == "sleep" and _wake.name == "keep.running":
+    if mode == "sleep" and _wake.name == "keep.running":
       # print(f'[comfyui-prevent-sleep] Already activated: {_wake.name}')
       return
     
-    if type == "screen_saver" and _wake.name == "keep.presenting":
+    if mode == "screen_saver" and _wake.name == "keep.presenting":
       # print(f'[comfyui-prevent-sleep] Already activated: {_wake.name}')
       return
     
     deactivate()
 
-  if type == "sleep":
+  if mode == "sleep":
     _wake = keep.running(on_fail="warn")
     _wake._activate()
     print(f'[comfyui-prevent-sleep] Activated: {_wake.name}')
 
-  if type == "screen_saver":
+  if mode == "screen_saver":
     _wake = keep.presenting(on_fail="warn")
     _wake._activate()
     print(f'[comfyui-prevent-sleep] Activated: {_wake.name}')
@@ -71,8 +71,8 @@ def deactivate():
 async def _enable(request):
   try:
     req = await request.json()
-    type = req.get("type")
-    activate(type)
+    mode = req.get("mode")
+    activate(mode)
     return web.Response(status=200)
   except Exception:
     print(traceback.format_exc())

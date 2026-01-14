@@ -10,33 +10,45 @@ function getSettingValue(id) {
   return app.extensionManager.setting.get(`shinich39.PreventSleep.${id}`);
 }
 
+function wait(delay) {
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, delay);
+  });
+}
+
 async function chkDependencies() {
   const response = await api.fetchApi(`/shinich39/comfyui-prevent-sleep/check-dependencies`);
   return response.status === 200;
 }
 
-async function update(type) {
-  const url = type !== "none" 
+async function update(mode) {
+  const url = mode !== "none" 
     ? `/shinich39/comfyui-prevent-sleep/enable`
     : `/shinich39/comfyui-prevent-sleep/disable`
 
   const response = await api.fetchApi(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", },
-    body: JSON.stringify({ type }),
+    body: JSON.stringify({ mode }),
   });
 
   if (response.status !== 200) {
     throw new Error(response.statusText);
   }
-
-  return type !== "none";
 }
 
-function wait(delay) {
-  return new Promise(function (resolve) {
-    return setTimeout(resolve, delay);
-  });
+async function prevent() {
+  if (!initialized) {
+    console.warn("[comfyui-prevent-sleep] not intialized yet");
+    return;
+  }
+
+  const mode = getSettingValue("Mode");
+  const duration = getSettingValue("Duration");
+
+  await update(mode);
+
+  console.log(`[comfyui-prevent-sleep] options`, { mode, duration });
 }
 
 function clearTimer() {
@@ -44,32 +56,18 @@ function clearTimer() {
 }
 
 function setTimer() {
-  setTimeout(async () => {
-    clearTimer();
+  const mode = getSettingValue("Mode");
+  const duration = getSettingValue("Duration");
 
-    if (!initialized) {
-      console.warn("[comfyui-prevent-sleep] not intialized yet");
-      return;
-    }
+  if (mode === "none" || duration <= 0) {
+    return;
+  }
 
-    const type = getSettingValue("Type");
-    // console.log(`[comfyui-prevent-sleep] type:`, type);
+  console.log(`[comfyui-prevent-sleep] timer: ${duration} seconds`);
 
-    const enabled = await update(type);
-
-    if (!enabled) {
-      return;
-    }
-
-    const duration = getSettingValue("Duration");
-    // console.log(`[comfyui-prevent-sleep] duration:`, duration);
-    
-    if (duration > 0) {
-      timer = setTimeout(() => {
-        update("none");
-      }, 1000 * duration);
-    }
-  }, 256);
+  timer = setTimeout(() => {
+    update("none");
+  }, 1000 * duration);
 }
 
 app.registerExtension({
@@ -82,14 +80,18 @@ app.registerExtension({
       type: 'number',
       tooltip: 'When generating image ended, it will allow prevented options after set time has passed, value is seconds, 0 is infinite',
       defaultValue: 0,
-      onChange: async (value) => {
-        setTimer();
+      onChange: (value) => {
+        setTimeout(async () => {
+          clearTimer();
+          await prevent();
+          setTimer();
+        }, 256);
       }
     },
     {
-      id: 'shinich39.PreventSleep.Type',
-      category: ['PreventSleep', 'The desktop screamed, Not in sound', 'Type'],
-      name: 'Type',
+      id: 'shinich39.PreventSleep.Mode',
+      category: ['PreventSleep', 'The desktop screamed, Not in sound', 'Mode'],
+      name: 'Mode',
       type: "combo",
       defaultValue: "none",
       options: [
@@ -97,22 +99,27 @@ app.registerExtension({
         { text: "Sleep", value: "sleep" },
         { text: "Screen Saver", value: "screen_saver" },
       ],
-      onChange: async (value) => {
-        setTimer();
+      onChange: (value) => {
+        setTimeout(async () => {
+          clearTimer();
+          await prevent();
+          setTimer();
+        }, 256);
       }
     },
   ],
 
   setup() {
-    // api.addEventListener("promptQueued", function(...args) {
-    //   setTimer();
-    // });
+    api.addEventListener("promptQueued", function(...args) {
+      clearTimer();
+      prevent();
+    });
 
     api.addEventListener("executed", function(...args) {
       setTimer();
     });
 
-    ;(async () => {
+    setTimeout(async () => {
       let retry = 39;
       initialized = await chkDependencies();
       while(!initialized && retry > 0) {
@@ -123,10 +130,12 @@ app.registerExtension({
 
       if (retry > 0) {
         console.log("[comfyui-prevent-sleep] Initialized");
+        clearTimer();
+        await prevent();
         setTimer();
       } else {
         console.log("[comfyui-prevent-sleep] Failed to initialize");
       }
-    })();
+    }, 1024);
   },
 });
