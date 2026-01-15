@@ -48,7 +48,7 @@ async function prevent() {
 
   await update(mode);
 
-  console.log(`[comfyui-prevent-sleep] options`, { mode, duration });
+  // console.log(`[comfyui-prevent-sleep] options`, { mode, duration });
 }
 
 function clearTimer() {
@@ -63,10 +63,11 @@ function setTimer() {
     return;
   }
 
-  console.log(`[comfyui-prevent-sleep] timer: ${duration} seconds`);
+  // console.log(`[comfyui-prevent-sleep] timer: ${duration} seconds`);
 
   timer = setTimeout(() => {
     update("none");
+    // console.log(`[comfyui-prevent-sleep] sleep enabled`);
   }, 1000 * duration);
 }
 
@@ -110,12 +111,20 @@ app.registerExtension({
   ],
 
   setup() {
-    api.addEventListener("promptQueued", function(...args) {
+    api.addEventListener("execution_start", function(...args) {
       clearTimer();
       prevent();
     });
 
-    api.addEventListener("executed", function(...args) {
+    api.addEventListener("execution_interrupted", function(...args) {
+      setTimer();
+    });
+
+    api.addEventListener("execution_success", function(...args) {
+      setTimer();
+    });
+
+    api.addEventListener("execution_error", function(...args) {
       setTimer();
     });
 
@@ -134,7 +143,7 @@ app.registerExtension({
         await prevent();
         setTimer();
       } else {
-        console.log("[comfyui-prevent-sleep] Failed to initialize");
+        console.error(new Error("[comfyui-prevent-sleep] Failed to initialize"));
       }
     }, 1024);
   },

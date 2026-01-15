@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-prevent-sleep"
 description = "Prevent sleep while running ComfyUI."
-version = "1.0.4"
+version = "1.0.5"
 license = { file = "LICENSE" }
 
 [project.urls]

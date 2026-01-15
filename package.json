@@ -1,6 +1,6 @@
 {
   "name": "comfyui-prevent-sleep",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Prevent sleep while running ComfyUI.",
   "type": "module",
   "scripts": {
