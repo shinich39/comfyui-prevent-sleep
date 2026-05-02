@@ -21,7 +21,7 @@ async function chkDependencies() {
   return response.status === 200;
 }
 
-async function update(mode) {
+async function update(mode, duration) {
   const url = mode !== "none" 
     ? `/shinich39/comfyui-prevent-sleep/enable`
     : `/shinich39/comfyui-prevent-sleep/disable`
@@ -35,6 +35,8 @@ async function update(mode) {
   if (response.status !== 200) {
     throw new Error(response.statusText);
   }
+
+  console.log(`[comfyui-prevent-sleep] updated`, { mode, duration });
 }
 
 async function prevent() {
@@ -46,18 +48,21 @@ async function prevent() {
   const mode = getSettingValue("Mode");
   const duration = getSettingValue("Duration");
 
-  await update(mode);
-
-  // console.log(`[comfyui-prevent-sleep] options`, { mode, duration });
+  await update(mode, duration);
 }
 
 function clearTimer() {
-  clearTimeout(timer);
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
 }
 
 function setTimer() {
   const mode = getSettingValue("Mode");
   const duration = getSettingValue("Duration");
+
+  clearTimer();
 
   if (mode === "none" || duration <= 0) {
     return;
@@ -65,8 +70,9 @@ function setTimer() {
 
   // console.log(`[comfyui-prevent-sleep] timer: ${duration} seconds`);
 
-  timer = setTimeout(() => {
-    update("none");
+  timer = setTimeout(async () => {
+    await update("none");
+    timer = null;
     // console.log(`[comfyui-prevent-sleep] sleep enabled`);
   }, 1000 * duration);
 }
@@ -81,13 +87,6 @@ app.registerExtension({
       type: 'number',
       tooltip: 'When generating image ended, it will allow prevented options after set time has passed, value is seconds, 0 is infinite',
       defaultValue: 0,
-      onChange: (value) => {
-        setTimeout(async () => {
-          clearTimer();
-          await prevent();
-          setTimer();
-        }, 256);
-      }
     },
     {
       id: 'shinich39.PreventSleep.Mode',
@@ -102,9 +101,7 @@ app.registerExtension({
       ],
       onChange: (value) => {
         setTimeout(async () => {
-          clearTimer();
           await prevent();
-          setTimer();
         }, 256);
       }
     },

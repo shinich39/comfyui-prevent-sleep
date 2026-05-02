@@ -6,6 +6,6 @@ Prevent sleep while running ComfyUI.
 
 Settings > PreventSleep > Mode, Duration
 
-## Acknowledgments
+## References
 
 - [wakepy](https://wakepy.readthedocs.io/)

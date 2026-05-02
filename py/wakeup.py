@@ -42,7 +42,8 @@ def activate(mode):
       # print(f'[comfyui-prevent-sleep] Already activated: {_wake.name}')
       return
     
-    deactivate()
+    _wake._deactivate()
+    _wake = None
 
   if mode == "sleep":
     _wake = keep.running(on_fail="warn")
